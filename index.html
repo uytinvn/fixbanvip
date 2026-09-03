@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Fix Ban</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px 0;
+            margin: 0;
+            background: #050508;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Canvas nền AI chuyển động */
+        #ai-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .box,
+        #codeInputBox,
+        #priceListBox {
+            width: 400px;
+            max-width: 90%;
+            margin: auto;
+            background: rgba(15, 15, 25, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.2);
+            color: white;
+        }
+
+        h2 {
+            margin-top: 0;
+            text-shadow: 0 0 10px #00ffcc;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #00ffcc;
+            border-radius: 8px;
+            font-size: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            outline: none;
+            text-align: center;
+        }
+
+        /* Nút tùy chọn chính có hiệu ứng phát sáng */
+        .option {
+            padding: 15px;
+            margin: 12px 0;
+            background: #111;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+            border: 1px solid #00ff66;
+        }
+
+        .option:hover {
+            background: #00ff66;
+            color: #111;
+            box-shadow: 0 0 20px #00ff66, 0 0 35px #00ff66;
+            transform: translateY(-2px);
+        }
+
+        #codeInputBox, #priceListBox {
+            display: none;
+        }
+
+        /* Nút bấm chung */
+        button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #00ff66;
+            border-radius: 8px;
+            background: #111;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+        }
+
+        button:hover {
+            background: #00ff66;
+            color: #111;
+            box-shadow: 0 0 20px #00ff66, 0 0 35px #00ff66;
+            transform: translateY(-2px);
+        }
+
+        .error {
+            color: #ff3366;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        .contact-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00ffcc;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px #00ffcc;
+        }
+
+        #codePanel {
+            display: none;
+            width: 650px;
+            max-width: 92%;
+            margin: auto;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: left;
+            font-family: Consolas, monospace;
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);
+            border: 1px solid #00ff66;
+            color: #00ff66;
+        }
+
+        #programTitle {
+            text-align: center;
+            color: #00ff66 !important;
+            text-shadow: 0 0 10px #00ff66;
+        }
+
+        .line {
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+
+        #codePanel.failed {
+            color: #ff3366;
+            border-color: #ff3366;
+            box-shadow: 0 0 30px rgba(255, 51, 102, 0.4);
+        }
+
+        #codePanel.failed h2 {
+            color: #ff3366 !important;
+            text-shadow: 0 0 10px #ff3366;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Background Trí Tuệ Nhân Tạo Chuyển Động -->
+<canvas id="ai-bg"></canvas>
+
+<div class="box" id="mainBox">
+
+    <h2>Nhập ID</h2>
+
+    <input
+        type="text"
+        id="userID"
+        placeholder="ID gồm 8-11 số"
+        maxlength="11"
+        inputmode="numeric"
+    >
+
+    <div class="option" onclick="openCodeBox()">
+        XÁC NHẬN
+    </div>
+
+    <!-- DÒNG 2: MỞ LINK FACEBOOK CHIA SẺ -->
+    <div class="option" onclick="window.location.href='https://www.facebook.com/share/1HMijaJj6y/?mibextid=wwXIfr'">
+        LẤY KEY FREE
+    </div>
+
+    <!-- DÒNG 3: MỞ BẢNG VIP -->
+    <div class="option" onclick="openPriceList()">
+        KEY-VIP
+    </div>
+
+</div>
+
+
+<div id="codeInputBox">
+
+    <h2>Nhập mã</h2>
+
+    <input
+        type="text"
+        id="codeInput"
+        placeholder="Nhập mã xác nhận"
+    >
+
+    <button onclick="confirmCode()">
+        Xác nhận
+    </button>
+
+    <div class="error" id="errorMessage"></div>
+
+</div>
+
+
+<!-- KHUNG HIỂN THỊ KHI ẤN KEY-VIP -->
+<div id="priceListBox">
+    <div class="contact-text">MUA KEY VIP LIÊN HỆ FB</div>
+    <button onclick="window.location.href='https://www.facebook.com/profile.php?id=61586481193514'">
+        Trang FB
+    </button>
+</div>
+
+
+<div id="codePanel">
+
+    <h2 id="programTitle">ĐANG KHỞI CHẠY CHƯƠNG TRÌNH</h2>
+
+    <div class="line" id="line1"></div>
+    <div class="line" id="line2"></div>
+    <div class="line" id="line3"></div>
+    <div class="line" id="line4"></div>
+    <div class="line" id="line5"></div>
+    <div class="line" id="line6"></div>
+    <div class="line" id="line7"></div>
+    <div class="line" id="line8"></div>
+    <div class="line" id="line9"></div>
+    <div class="line" id="line10"></div>
+    <div class="line" id="line11"></div>
+
+</div>
+
+
+<script>
+
+// ===== HỆ THỐNG BACKGROUND AI PHÁT SÁNG SẶC SỠ =====
+const canvas = document.getElementById('ai-bg');
+const ctx = canvas.getContext('2d');
+
+let particlesArray = [];
+const numberOfParticles = 75;
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    init();
+});
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.speedX = (Math.random() - 0.5) * 1.5;
+        this.speedY = (Math.random() - 0.5) * 1.5;
+        this.hue = Math.random() * 360; // Màu sắc đa dạng dạng HSL
+    }
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+
+        this.hue += 0.5; // Xoay màu liên tục
+    }
+    draw() {
+        ctx.fillStyle = `hsl(${this.hue}, 100%, 60%)`;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = `hsl(${this.hue}, 100%, 60%)`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function init() {
+    particlesArray = [];
+    for (let i = 0; i < numberOfParticles; i++) {
+        particlesArray.push(new Particle());
+    }
+}
+
+function connect() {
+    for (let a = 0; a < particlesArray.length; a++) {
+        for (let b = a; b < particlesArray.length; b++) {
+            let dx = particlesArray[a].x - particlesArray[b].x;
+            let dy = particlesArray[a].y - particlesArray[b].y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 120) {
+                ctx.strokeStyle = `hsl(${particlesArray[a].hue}, 100%, 50%)`;
+                ctx.lineWidth = 0.8;
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = `hsl(${particlesArray[a].hue}, 100%, 50%)`;
+                ctx.beginPath();
+                ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < particlesArray.length; i++) {
+        particlesArray[i].update();
+        particlesArray[i].draw();
+    }
+    connect();
+    requestAnimationFrame(animate);
+}
+
+init();
+animate();
+
+
+// ===== LOGIC MÃ CODE BÊN TRONG =====
+const failCodes = [
+    "USERFIXBAN-8F2K7M4Q9X", "USERFIXBAN-3N6R1T8P5V", "USERFIXBAN-7C4L9W2A6K", "USERFIXBAN-5X8B3Q1M7R",
+    "USERFIXBAN-9P4D6N2Y8T", "USERFIXBAN-1K7V5C9L3Q", "USERFIXBAN-6M2R8X4B1N", "USERFIXBAN-4T9A6P2K7W",
+    "USERFIXBAN-8Q3L5N1V9C", "USERFIXBAN-2B7X4M8R6P", "USERFIXBAN-5V1K9D3T7A", "USERFIXBAN-9C6Q2W8L4M",
+    "USERFIXBAN-3R8P5X1N7K", "USERFIXBAN-7A4M9B2Q6V", "USERFIXBAN-1W6T3K8C5R", "USERFIXBAN-6L9N4P2X7B",
+    "USERFIXBAN-4Q1V8M5D9K", "USERFIXBAN-8K3R6A1T5P", "USERFIXBAN-2N7C9X4L6W", "USERFIXBAN-5P8B1Q7M3V",
+    "USERFIXBAN-9T2K6R4A8N", "USERFIXBAN-3X5M8C1P7L", "USERFIXBAN-7V9D2N6Q4K", "USERFIXBAN-1R6B3W8T5M",
+    "USERFIXBAN-6A4P9L2X7C", "USERFIXBAN-4M8Q1K6V3R", "USERFIXBAN-8N5T2B9D4P", "USERFIXBAN-2K7L3X8M5Q",
+    "USERFIXBAN-5C9R4A1N6V", "USERFIXBAN-9W3P7K2T8B"
+];
+
+const vipCodes = [
+    "USERFIXBAN-VIP7KQ2M", "USERFIXBAN-VIP4X9R", "USERFIXBAN-VIP8N3W", "USERFIXBAN-VIP2Z6K",
+    "USERFIXBAN-VIP5T1Q", "USERFIXBAN-VIP9C7V", "USERFIXBAN-VIP3M8P", "USERFIXBAN-VIP6R2X",
+    "USERFIXBAN-VIP1W5N", "USERFIXBAN-VIP7D9L", "USERFIXBAN-VIP4Q2H", "USERFIXBAN-VIP8K6T",
+    "USERFIXBAN-VIP3X1B", "USERFIXBAN-VIP9M4C", "USERFIXBAN-VIP5P8Z",
+    "USERFIXBAN-VIP001A", "USERFIXBAN-VIP002B", "USERFIXBAN-VIP003C", "USERFIXBAN-VIP004D", "USERFIXBAN-VIP005E",
+    "USERFIXBAN-VIP006F", "USERFIXBAN-VIP007G", "USERFIXBAN-VIP008H", "USERFIXBAN-VIP009J", "USERFIXBAN-VIP010K",
+    "USERFIXBAN-VIP011L", "USERFIXBAN-VIP012M", "USERFIXBAN-VIP013N", "USERFIXBAN-VIP014P", "USERFIXBAN-VIP015Q",
+    "USERFIXBAN-VIP016R", "USERFIXBAN-VIP017S", "USERFIXBAN-VIP018T", "USERFIXBAN-VIP019V", "USERFIXBAN-VIP020W",
+    "USERFIXBAN-VIP021X", "USERFIXBAN-VIP022Y", "USERFIXBAN-VIP023Z", "USERFIXBAN-VIP024A", "USERFIXBAN-VIP025B",
+    "USERFIXBAN-VIP026C", "USERFIXBAN-VIP027D", "USERFIXBAN-VIP028E", "USERFIXBAN-VIP029F", "USERFIXBAN-VIP030G",
+    "USERFIXBAN-VIP031H", "USERFIXBAN-VIP032J", "USERFIXBAN-VIP033K", "USERFIXBAN-VIP034L", "USERFIXBAN-VIP035M",
+    "USERFIXBAN-VIP036N", "USERFIXBAN-VIP037P", "USERFIXBAN-VIP038Q", "USERFIXBAN-VIP039R", "USERFIXBAN-VIP040S",
+    "USERFIXBAN-VIP041T", "USERFIXBAN-VIP042V", "USERFIXBAN-VIP043W", "USERFIXBAN-VIP044X", "USERFIXBAN-VIP045Y",
+    "USERFIXBAN-VIP046Z", "USERFIXBAN-VIP047A", "USERFIXBAN-VIP048B", "USERFIXBAN-VIP049C", "USERFIXBAN-VIP050D",
+    "USERFIXBAN-VIP051E", "USERFIXBAN-VIP052F", "USERFIXBAN-VIP053G", "USERFIXBAN-VIP054H", "USERFIXBAN-VIP055J",
+    "USERFIXBAN-VIP056K", "USERFIXBAN-VIP057L", "USERFIXBAN-VIP058M", "USERFIXBAN-VIP059N", "USERFIXBAN-VIP060P",
+    "USERFIXBAN-VIP061Q", "USERFIXBAN-VIP062R", "USERFIXBAN-VIP063S", "USERFIXBAN-VIP064T", "USERFIXBAN-VIP065V",
+    "USERFIXBAN-VIP066W", "USERFIXBAN-VIP067X", "USERFIXBAN-VIP068Y", "USERFIXBAN-VIP069Z", "USERFIXBAN-VIP070A",
+    "USERFIXBAN-VIP071B", "USERFIXBAN-VIP072C", "USERFIXBAN-VIP073D", "USERFIXBAN-VIP074E", "USERFIXBAN-VIP075F",
+    "USERFIXBAN-VIP076G", "USERFIXBAN-VIP077H", "USERFIXBAN-VIP078J", "USERFIXBAN-VIP079K", "USERFIXBAN-VIP080L",
+    "USERFIXBAN-VIP081M", "USERFIXBAN-VIP082N", "USERFIXBAN-VIP083P", "USERFIXBAN-VIP084Q", "USERFIXBAN-VIP085R",
+    "USERFIXBAN-VIP086S", "USERFIXBAN-VIP087T", "USERFIXBAN-VIP088V", "USERFIXBAN-VIP089W", "USERFIXBAN-VIP090X",
+    "USERFIXBAN-VIP091Y", "USERFIXBAN-VIP092Z", "USERFIXBAN-VIP093A", "USERFIXBAN-VIP094B", "USERFIXBAN-VIP095C",
+    "USERFIXBAN-VIP096D", "USERFIXBAN-VIP097E", "USERFIXBAN-VIP098F", "USERFIXBAN-VIP099G", "USERFIXBAN-VIP100H",
+    "USERFIXBAN-VIP101J", "USERFIXBAN-VIP102K", "USERFIXBAN-VIP103L", "USERFIXBAN-VIP104M", "USERFIXBAN-VIP105N",
+    "USERFIXBAN-VIP106P", "USERFIXBAN-VIP107Q", "USERFIXBAN-VIP108R", "USERFIXBAN-VIP109S", "USERFIXBAN-VIP110T",
+    "USERFIXBAN-VIP111V", "USERFIXBAN-VIP112W", "USERFIXBAN-VIP113X", "USERFIXBAN-VIP114Y", "USERFIXBAN-VIP115Z",
+    "USERFIXBAN-VIP116A", "USERFIXBAN-VIP117B", "USERFIXBAN-VIP118C", "USERFIXBAN-VIP119D", "USERFIXBAN-VIP120E",
+    "USERFIXBAN-VIP121F", "USERFIXBAN-VIP122G", "USERFIXBAN-VIP123H", "USERFIXBAN-VIP124J", "USERFIXBAN-VIP125K",
+    "USERFIXBAN-VIP126L", "USERFIXBAN-VIP127M", "USERFIXBAN-VIP128N", "USERFIXBAN-VIP129P", "USERFIXBAN-VIP130Q",
+    "USERFIXBAN-VIP131R", "USERFIXBAN-VIP132S", "USERFIXBAN-VIP133T", "USERFIXBAN-VIP134V", "USERFIXBAN-VIP135W",
+    "USERFIXBAN-VIP136X", "USERFIXBAN-VIP137Y", "USERFIXBAN-VIP138Z", "USERFIXBAN-VIP139A", "USERFIXBAN-VIP140B",
+    "USERFIXBAN-VIP141C", "USERFIXBAN-VIP142D", "USERFIXBAN-VIP143E", "USERFIXBAN-VIP144F", "USERFIXBAN-VIP145G",
+    "USERFIXBAN-VIP146H", "USERFIXBAN-VIP147J", "USERFIXBAN-VIP148K", "USERFIXBAN-VIP149L", "USERFIXBAN-VIP150M",
+    "USERFIXBAN-VIP151N", "USERFIXBAN-VIP152P", "USERFIXBAN-VIP153Q", "USERFIXBAN-VIP154R", "USERFIXBAN-VIP155S",
+    "USERFIXBAN-VIP156T", "USERFIXBAN-VIP157V", "USERFIXBAN-VIP158W", "USERFIXBAN-VIP159X", "USERFIXBAN-VIP160Y",
+    "USERFIXBAN-VIP161Z", "USERFIXBAN-VIP162A", "USERFIXBAN-VIP163B", "USERFIXBAN-VIP164C", "USERFIXBAN-VIP165D",
+    "USERFIXBAN-VIP166E", "USERFIXBAN-VIP167F", "USERFIXBAN-VIP168G", "USERFIXBAN-VIP169H", "USERFIXBAN-VIP170J",
+    "USERFIXBAN-VIP171K", "USERFIXBAN-VIP172L", "USERFIXBAN-VIP173M", "USERFIXBAN-VIP174N", "USERFIXBAN-VIP175P",
+    "USERFIXBAN-VIP176Q", "USERFIXBAN-VIP177R", "USERFIXBAN-VIP178S", "USERFIXBAN-VIP179T", "USERFIXBAN-VIP180V",
+    "USERFIXBAN-VIP181W", "USERFIXBAN-VIP182X", "USERFIXBAN-VIP183Y", "USERFIXBAN-VIP184Z", "USERFIXBAN-VIP185A",
+    "USERFIXBAN-VIP186B", "USERFIXBAN-VIP187C", "USERFIXBAN-VIP188D", "USERFIXBAN-VIP189E", "USERFIXBAN-VIP190F",
+    "USERFIXBAN-VIP191G", "USERFIXBAN-VIP192H", "USERFIXBAN-VIP193J", "USERFIXBAN-VIP194K", "USERFIXBAN-VIP195L",
+    "USERFIXBAN-VIP196M", "USERFIXBAN-VIP197N", "USERFIXBAN-VIP198P", "USERFIXBAN-VIP199Q", "USERFIXBAN-VIP200R"
+];
+
+
+function openCodeBox() {
+    const id = document.getElementById("userID").value.trim();
+
+    if (!/^[0-9]{8,11}$/.test(id)) {
+        alert("ID phải gồm từ 8 đến 11 chữ số!");
+        return;
+    }
+
+    document.getElementById("mainBox").style.display = "none";
+    document.getElementById("codeInputBox").style.display = "block";
+}
+
+function openPriceList() {
+    document.getElementById("mainBox").style.display = "none";
+    document.getElementById("priceListBox").style.display = "block";
+}
+
+
+function confirmCode() {
+    const id = document.getElementById("userID").value.trim();
+    const code = document.getElementById("codeInput").value.trim();
+    const error = document.getElementById("errorMessage");
+
+    const isFail = failCodes.includes(code);
+    const isVip = vipCodes.includes(code);
+
+    if (!isFail && !isVip) {
+        error.innerText = "Mã không hợp lệ!";
+        return;
+    }
+
+    error.innerText = "";
+
+    document.getElementById("codeInputBox").style.display = "none";
+    document.getElementById("codePanel").style.display = "block";
+
+    document.getElementById("codePanel").classList.remove("failed");
+
+    for (let i = 1; i <= 11; i++) {
+        document.getElementById("line" + i).innerText = "";
+    }
+
+    setTimeout(() => { document.getElementById("line1").innerText = "Unban FF ID " + id; }, 400);
+    setTimeout(() => { document.getElementById("line2").innerText = "[+] Connecting to Garena FF Server..."; }, 1000);
+    setTimeout(() => { document.getElementById("line3").innerText = ">> Injecting payload into com.dts.freefireth..."; }, 1600);
+    setTimeout(() => { document.getElementById("line4").innerText = "- >> Overriding security token..."; }, 2200);
+    setTimeout(() => { document.getElementById("line5").innerText = "- >> Fetching player profile data from database..."; }, 2800);
+    setTimeout(() => { document.getElementById("line6").innerText = "- >> Bypassing anti-cheat protection..."; }, 3400);
+    setTimeout(() => { document.getElementById("line7").innerText = "- >> Decrypting ban status flags..."; }, 4000);
+    setTimeout(() => { document.getElementById("line8").innerText = "- >> Patching packet headers..."; }, 4600);
+    setTimeout(() => { document.getElementById("line9").innerText = "- >> Syncing server response packets..."; }, 5200);
+    setTimeout(() => { document.getElementById("line10").innerText = "- >> Bypassing AES-256 encryption..."; }, 5800);
+
+    setTimeout(() => {
+        if (isFail) {
+            document.getElementById("codePanel").classList.add("failed");
+            document.getElementById("line11").innerText = "[!] UNLOCK FAILED! Server rejected request.";
+        } else if (isVip) {
+            document.getElementById("line11").innerText = "[+] UNLOCK SUCCESSFUL! Device & Account unbanned.";
+        }
+    }, 6500);
+}
+
+</script>
+
+</body>
+</html>
